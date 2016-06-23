@@ -27,6 +27,7 @@ var AuthToken = MediaType("application/vnd.authtoken+json", func() {
 		Attribute("token", String, "JWT Token")
 		Required("token")
 	})
+
 	View("default", func() {
 		Attribute("token")
 	})

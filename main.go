@@ -5,7 +5,11 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/jinzhu/gorm"
+	_ "github.com/lib/pq"
+
 	"github.com/almighty/almighty-core/app"
+	"github.com/almighty/almighty-core/migration"
 	token "github.com/dgrijalva/jwt-go"
 	"github.com/goadesign/goa"
 	"github.com/goadesign/goa/middleware"
@@ -25,6 +29,15 @@ func main() {
 
 	flag.BoolVar(&Development, "dev", false, "Enable development related features, e.g. token generation endpoint")
 	flag.Parse()
+
+	db, err := gorm.Open("postgres", "user=postgres password=mysecretpassword sslmode=disable")
+	if err != nil {
+		panic("failed to connect database")
+	}
+	defer db.Close()
+
+	// Migrate the schema
+	migration.Perform(db)
 
 	// Create service
 	service := goa.New("alm")
