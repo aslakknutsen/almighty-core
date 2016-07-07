@@ -41,11 +41,11 @@ func (m Identity) TableName() string {
 // IdentityDB is the implementation of the storage interface for
 // Identity.
 type IdentityDB struct {
-	Db gorm.DB
+	Db *gorm.DB
 }
 
 // NewIdentityDB creates a new storage type.
-func NewIdentityDB(db gorm.DB) *IdentityDB {
+func NewIdentityDB(db *gorm.DB) *IdentityDB {
 	return &IdentityDB{Db: db}
 }
 
@@ -57,9 +57,9 @@ func (m *IdentityDB) DB() interface{} {
 // IdentityStorage represents the storage interface.
 type IdentityStorage interface {
 	DB() interface{}
-	List(ctx context.Context) []Identity
-	Get(ctx context.Context, id uuid.UUID) (Identity, error)
-	Add(ctx context.Context, identity *Identity) (*Identity, error)
+	List(ctx context.Context) ([]*Identity, error)
+	Get(ctx context.Context, id uuid.UUID) (*Identity, error)
+	Add(ctx context.Context, identity *Identity) error
 	Update(ctx context.Context, identity *Identity) error
 	Delete(ctx context.Context, id uuid.UUID) error
 }
@@ -75,34 +75,33 @@ func (m *IdentityDB) TableName() string {
 
 // Get returns a single Identity as a Database Model
 // This is more for use internally, and probably not what you want in  your controllers
-func (m *IdentityDB) Get(ctx context.Context, id uuid.UUID) (Identity, error) {
+func (m *IdentityDB) Get(ctx context.Context, id uuid.UUID) (*Identity, error) {
 	defer goa.MeasureSince([]string{"goa", "db", "identity", "get"}, time.Now())
 
 	var native Identity
 	err := m.Db.Table(m.TableName()).Where("id = ?", id).Find(&native).Error
 	if err == gorm.ErrRecordNotFound {
-		return Identity{}, nil
+		return nil, nil
 	}
 
-	return native, err
+	return &native, err
 }
 
 // List returns an array of Identity
-func (m *IdentityDB) List(ctx context.Context) []Identity {
+func (m *IdentityDB) List(ctx context.Context) ([]*Identity, error) {
 	defer goa.MeasureSince([]string{"goa", "db", "identity", "list"}, time.Now())
 
-	var objs []Identity
+	var objs []*Identity
 	err := m.Db.Table(m.TableName()).Find(&objs).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
-		goa.LogError(ctx, "error listing Identity", "error", err.Error())
-		return objs
+		return nil, err
 	}
 
-	return objs
+	return objs, nil
 }
 
-// Add creates a new record.  /// Maybe shouldn't return the model, it's a pointer.
-func (m *IdentityDB) Add(ctx context.Context, model *Identity) (*Identity, error) {
+// Add creates a new record.
+func (m *IdentityDB) Add(ctx context.Context, model *Identity) error {
 	defer goa.MeasureSince([]string{"goa", "db", "identity", "add"}, time.Now())
 
 	model.ID = uuid.NewV4()
@@ -110,10 +109,10 @@ func (m *IdentityDB) Add(ctx context.Context, model *Identity) (*Identity, error
 	err := m.Db.Create(model).Error
 	if err != nil {
 		goa.LogError(ctx, "error adding Identity", "error", err.Error())
-		return model, err
+		return err
 	}
 
-	return model, err
+	return nil
 }
 
 // Update modifies a single record.
@@ -125,7 +124,7 @@ func (m *IdentityDB) Update(ctx context.Context, model *Identity) error {
 		goa.LogError(ctx, "error updating Identity", "error", err.Error())
 		return err
 	}
-	err = m.Db.Model(&obj).Updates(model).Error
+	err = m.Db.Model(obj).Updates(model).Error
 
 	return err
 }

@@ -42,11 +42,11 @@ func (m Team) TableName() string {
 // TeamDB is the implementation of the storage interface for
 // Team.
 type TeamDB struct {
-	Db gorm.DB
+	Db *gorm.DB
 }
 
 // NewTeamDB creates a new storage type.
-func NewTeamDB(db gorm.DB) *TeamDB {
+func NewTeamDB(db *gorm.DB) *TeamDB {
 	return &TeamDB{Db: db}
 }
 
@@ -58,9 +58,9 @@ func (m *TeamDB) DB() interface{} {
 // TeamStorage represents the storage interface.
 type TeamStorage interface {
 	DB() interface{}
-	List(ctx context.Context) []Team
-	Get(ctx context.Context, id uuid.UUID) (Team, error)
-	Add(ctx context.Context, team *Team) (*Team, error)
+	List(ctx context.Context) ([]*Team, error)
+	Get(ctx context.Context, id uuid.UUID) (*Team, error)
+	Add(ctx context.Context, team *Team) error
 	Update(ctx context.Context, team *Team) error
 	Delete(ctx context.Context, id uuid.UUID) error
 }
@@ -76,34 +76,33 @@ func (m *TeamDB) TableName() string {
 
 // Get returns a single Team as a Database Model
 // This is more for use internally, and probably not what you want in  your controllers
-func (m *TeamDB) Get(ctx context.Context, id uuid.UUID) (Team, error) {
+func (m *TeamDB) Get(ctx context.Context, id uuid.UUID) (*Team, error) {
 	defer goa.MeasureSince([]string{"goa", "db", "team", "get"}, time.Now())
 
 	var native Team
 	err := m.Db.Table(m.TableName()).Where("id = ?", id).Find(&native).Error
 	if err == gorm.ErrRecordNotFound {
-		return Team{}, nil
+		return nil, nil
 	}
 
-	return native, err
+	return &native, err
 }
 
 // List returns an array of Team
-func (m *TeamDB) List(ctx context.Context) []Team {
+func (m *TeamDB) List(ctx context.Context) ([]*Team, error) {
 	defer goa.MeasureSince([]string{"goa", "db", "team", "list"}, time.Now())
 
-	var objs []Team
+	var objs []*Team
 	err := m.Db.Table(m.TableName()).Find(&objs).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
-		goa.LogError(ctx, "error listing Team", "error", err.Error())
-		return objs
+		return nil, err
 	}
 
-	return objs
+	return objs, nil
 }
 
-// Add creates a new record.  /// Maybe shouldn't return the model, it's a pointer.
-func (m *TeamDB) Add(ctx context.Context, model *Team) (*Team, error) {
+// Add creates a new record.
+func (m *TeamDB) Add(ctx context.Context, model *Team) error {
 	defer goa.MeasureSince([]string{"goa", "db", "team", "add"}, time.Now())
 
 	model.ID = uuid.NewV4()
@@ -111,10 +110,10 @@ func (m *TeamDB) Add(ctx context.Context, model *Team) (*Team, error) {
 	err := m.Db.Create(model).Error
 	if err != nil {
 		goa.LogError(ctx, "error adding Team", "error", err.Error())
-		return model, err
+		return err
 	}
 
-	return model, err
+	return nil
 }
 
 // Update modifies a single record.
@@ -126,7 +125,7 @@ func (m *TeamDB) Update(ctx context.Context, model *Team) error {
 		goa.LogError(ctx, "error updating Team", "error", err.Error())
 		return err
 	}
-	err = m.Db.Model(&obj).Updates(model).Error
+	err = m.Db.Model(obj).Updates(model).Error
 
 	return err
 }
