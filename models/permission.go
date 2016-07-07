@@ -39,11 +39,11 @@ func (m Permission) TableName() string {
 // PermissionDB is the implementation of the storage interface for
 // Permission.
 type PermissionDB struct {
-	Db gorm.DB
+	Db *gorm.DB
 }
 
 // NewPermissionDB creates a new storage type.
-func NewPermissionDB(db gorm.DB) *PermissionDB {
+func NewPermissionDB(db *gorm.DB) *PermissionDB {
 	return &PermissionDB{Db: db}
 }
 
@@ -55,9 +55,9 @@ func (m *PermissionDB) DB() interface{} {
 // PermissionStorage represents the storage interface.
 type PermissionStorage interface {
 	DB() interface{}
-	List(ctx context.Context) []Permission
-	Get(ctx context.Context, id uuid.UUID) (Permission, error)
-	Add(ctx context.Context, permission *Permission) (*Permission, error)
+	List(ctx context.Context) ([]*Permission, error)
+	Get(ctx context.Context, id uuid.UUID) (*Permission, error)
+	Add(ctx context.Context, permission *Permission) error
 	Update(ctx context.Context, permission *Permission) error
 	Delete(ctx context.Context, id uuid.UUID) error
 }
@@ -73,34 +73,33 @@ func (m *PermissionDB) TableName() string {
 
 // Get returns a single Permission as a Database Model
 // This is more for use internally, and probably not what you want in  your controllers
-func (m *PermissionDB) Get(ctx context.Context, id uuid.UUID) (Permission, error) {
+func (m *PermissionDB) Get(ctx context.Context, id uuid.UUID) (*Permission, error) {
 	defer goa.MeasureSince([]string{"goa", "db", "permission", "get"}, time.Now())
 
 	var native Permission
 	err := m.Db.Table(m.TableName()).Where("id = ?", id).Find(&native).Error
 	if err == gorm.ErrRecordNotFound {
-		return Permission{}, nil
+		return nil, nil
 	}
 
-	return native, err
+	return &native, err
 }
 
 // List returns an array of Permission
-func (m *PermissionDB) List(ctx context.Context) []Permission {
+func (m *PermissionDB) List(ctx context.Context) ([]*Permission, error) {
 	defer goa.MeasureSince([]string{"goa", "db", "permission", "list"}, time.Now())
 
-	var objs []Permission
+	var objs []*Permission
 	err := m.Db.Table(m.TableName()).Find(&objs).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
-		goa.LogError(ctx, "error listing Permission", "error", err.Error())
-		return objs
+		return nil, err
 	}
 
-	return objs
+	return objs, nil
 }
 
-// Add creates a new record.  /// Maybe shouldn't return the model, it's a pointer.
-func (m *PermissionDB) Add(ctx context.Context, model *Permission) (*Permission, error) {
+// Add creates a new record.
+func (m *PermissionDB) Add(ctx context.Context, model *Permission) error {
 	defer goa.MeasureSince([]string{"goa", "db", "permission", "add"}, time.Now())
 
 	model.ID = uuid.NewV4()
@@ -108,10 +107,10 @@ func (m *PermissionDB) Add(ctx context.Context, model *Permission) (*Permission,
 	err := m.Db.Create(model).Error
 	if err != nil {
 		goa.LogError(ctx, "error adding Permission", "error", err.Error())
-		return model, err
+		return err
 	}
 
-	return model, err
+	return nil
 }
 
 // Update modifies a single record.
@@ -123,7 +122,7 @@ func (m *PermissionDB) Update(ctx context.Context, model *Permission) error {
 		goa.LogError(ctx, "error updating Permission", "error", err.Error())
 		return err
 	}
-	err = m.Db.Model(&obj).Updates(model).Error
+	err = m.Db.Model(obj).Updates(model).Error
 
 	return err
 }

@@ -39,11 +39,11 @@ func (m Project) TableName() string {
 // ProjectDB is the implementation of the storage interface for
 // Project.
 type ProjectDB struct {
-	Db gorm.DB
+	Db *gorm.DB
 }
 
 // NewProjectDB creates a new storage type.
-func NewProjectDB(db gorm.DB) *ProjectDB {
+func NewProjectDB(db *gorm.DB) *ProjectDB {
 	return &ProjectDB{Db: db}
 }
 
@@ -55,9 +55,9 @@ func (m *ProjectDB) DB() interface{} {
 // ProjectStorage represents the storage interface.
 type ProjectStorage interface {
 	DB() interface{}
-	List(ctx context.Context) []Project
-	Get(ctx context.Context, id uuid.UUID) (Project, error)
-	Add(ctx context.Context, project *Project) (*Project, error)
+	List(ctx context.Context) ([]*Project, error)
+	Get(ctx context.Context, id uuid.UUID) (*Project, error)
+	Add(ctx context.Context, project *Project) error
 	Update(ctx context.Context, project *Project) error
 	Delete(ctx context.Context, id uuid.UUID) error
 }
@@ -73,34 +73,33 @@ func (m *ProjectDB) TableName() string {
 
 // Get returns a single Project as a Database Model
 // This is more for use internally, and probably not what you want in  your controllers
-func (m *ProjectDB) Get(ctx context.Context, id uuid.UUID) (Project, error) {
+func (m *ProjectDB) Get(ctx context.Context, id uuid.UUID) (*Project, error) {
 	defer goa.MeasureSince([]string{"goa", "db", "project", "get"}, time.Now())
 
 	var native Project
 	err := m.Db.Table(m.TableName()).Where("id = ?", id).Find(&native).Error
 	if err == gorm.ErrRecordNotFound {
-		return Project{}, nil
+		return nil, nil
 	}
 
-	return native, err
+	return &native, err
 }
 
 // List returns an array of Project
-func (m *ProjectDB) List(ctx context.Context) []Project {
+func (m *ProjectDB) List(ctx context.Context) ([]*Project, error) {
 	defer goa.MeasureSince([]string{"goa", "db", "project", "list"}, time.Now())
 
-	var objs []Project
+	var objs []*Project
 	err := m.Db.Table(m.TableName()).Find(&objs).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
-		goa.LogError(ctx, "error listing Project", "error", err.Error())
-		return objs
+		return nil, err
 	}
 
-	return objs
+	return objs, nil
 }
 
-// Add creates a new record.  /// Maybe shouldn't return the model, it's a pointer.
-func (m *ProjectDB) Add(ctx context.Context, model *Project) (*Project, error) {
+// Add creates a new record.
+func (m *ProjectDB) Add(ctx context.Context, model *Project) error {
 	defer goa.MeasureSince([]string{"goa", "db", "project", "add"}, time.Now())
 
 	model.ID = uuid.NewV4()
@@ -108,10 +107,10 @@ func (m *ProjectDB) Add(ctx context.Context, model *Project) (*Project, error) {
 	err := m.Db.Create(model).Error
 	if err != nil {
 		goa.LogError(ctx, "error adding Project", "error", err.Error())
-		return model, err
+		return err
 	}
 
-	return model, err
+	return nil
 }
 
 // Update modifies a single record.
@@ -123,7 +122,7 @@ func (m *ProjectDB) Update(ctx context.Context, model *Project) error {
 		goa.LogError(ctx, "error updating Project", "error", err.Error())
 		return err
 	}
-	err = m.Db.Model(&obj).Updates(model).Error
+	err = m.Db.Model(obj).Updates(model).Error
 
 	return err
 }
