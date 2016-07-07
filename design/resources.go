@@ -30,11 +30,16 @@ var _ = Resource("login", func() {
 		Routing(
 			GET("authorize"),
 		)
+		Params(func() {
+			Param("code", String)
+			Param("state", String)
+		})
 		Description("Authorize with the ALM")
 		Response(OK, func() {
 			Media(AuthToken)
 		})
 		Response(Unauthorized)
+		Response(TemporaryRedirect)
 	})
 
 	Action("generate", func() {

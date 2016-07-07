@@ -1,7 +1,12 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
 	"time"
+
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/github"
 
 	"github.com/almighty/almighty-core/app"
 	"github.com/dgrijalva/jwt-go"
@@ -18,23 +23,70 @@ func NewLoginController(service *goa.Service) *LoginController {
 	return &LoginController{Controller: service.NewController("login")}
 }
 
+// GitHubEmail represents the response from api.github.com/user/emails
+type GitHubEmail struct {
+	Email    string `json:"email"`
+	Primary  bool   `json:"primary"`
+	Verified bool   `json:"verified"`
+}
+
 // Authorize runs the authorize action.
 func (c *LoginController) Authorize(ctx *app.AuthorizeLoginContext) error {
-	token := jwt.New(jwt.SigningMethodRS256)
-	token.Claims.(jwt.MapClaims)["exp"] = time.Now().Add(time.Hour * 72).Unix()
-	token.Claims.(jwt.MapClaims)["scopes"] = []string{"system"}
+	/*
+		token := jwt.New(jwt.SigningMethodRS256)
+		token.Claims.(jwt.MapClaims)["exp"] = time.Now().Add(time.Hour * 72).Unix()
+		token.Claims.(jwt.MapClaims)["scopes"] = []string{"system"}
 
-	key, err := jwt.ParseRSAPrivateKeyFromPEM(([]byte(RSAPrivateKey)))
-	if err != nil {
-		panic(err)
+		key, err := jwt.ParseRSAPrivateKeyFromPEM(([]byte(RSAPrivateKey)))
+		if err != nil {
+			panic(err)
+		}
+
+		tokenStr, err := token.SignedString(key)
+		if err != nil {
+			panic(err)
+		}
+		authToken := app.AuthToken{Token: tokenStr}
+		return ctx.OK(&authToken)
+	*/
+	conf := &oauth2.Config{
+		ClientID:     "875da0d2113ba0a6951d",
+		ClientSecret: "2fe6736e90a9283036a37059d75ac0c82f4f5288",
+		Scopes:       []string{"user:email"},
+		Endpoint:     github.Endpoint,
 	}
 
-	tokenStr, err := token.SignedString(key)
-	if err != nil {
-		panic(err)
+	code := ctx.Code
+	if code != nil {
+		token, err := conf.Exchange(ctx, *code)
+		if err != nil {
+			fmt.Println(err)
+			return ctx.Unauthorized()
+		}
+
+		client := conf.Client(ctx, token)
+		resp, err := client.Get("https://api.github.com/user/emails")
+		if err != nil {
+			fmt.Println(err)
+			return ctx.Unauthorized()
+		}
+
+		var emails []GitHubEmail
+		json.NewDecoder(resp.Body).Decode(&emails)
+		fmt.Println(emails)
+
+		// locate identity
+		// register emails in User table
+		// fetch permissions
+		// generate token
+
+		return ctx.OK(&app.AuthToken{Token: fmt.Sprint(emails)})
 	}
-	authToken := app.AuthToken{Token: tokenStr}
-	return ctx.OK(&authToken)
+
+	redirectURL := conf.AuthCodeURL("A", oauth2.AccessTypeOnline)
+	ctx.ResponseData.Header().Set("Location", redirectURL)
+
+	return ctx.TemporaryRedirect()
 }
 
 // Generate runs the authorize action.
