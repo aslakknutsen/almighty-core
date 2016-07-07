@@ -1,13 +1,8 @@
-hash: 9beeb2e6cfdfe654cb8b7b4165c2309c3b5bc30e09bf7d73a7e44f20a4747ef0
-updated: 2016-07-07T13:06:17.705468927+02:00
+hash: a8b689b5d897c16b907cba204761d72bd4f655058d906fc3be791f8df51a91dd
+updated: 2016-07-08T01:34:05.575456379+02:00
 imports:
 - name: bitbucket.org/pkg/inflect
   version: 8961c3750a47b8c0b3e118d52513b97adf85a7e8
-- name: github.com/almighty/almighty-core
-  version: d135f9e6f40f80aeccc1e5aed772db5659f2bc95
-  subpackages:
-  - client
-  - tool/cli
 - name: github.com/armon/go-metrics
   version: fbf75676ee9c0a3a23eb0a4d9220a3612cfbd1ed
 - name: github.com/dgrijalva/jwt-go
@@ -21,7 +16,7 @@ imports:
   subpackages:
   - go-bindata-assetfs
 - name: github.com/goadesign/goa
-  version: 2e7da3053d6414a39453cf0dc60d00d749ad9158
+  version: a520ec028146a329500696970c8522a36f578c60
   vcs: git
   subpackages:
   - client
@@ -36,12 +31,25 @@ imports:
   - goagen/gen_app
   - uuid
   - dslengine
+  - goagen/codegen
+  - goagen/utils
+  - version
 - name: github.com/goadesign/gorma
   version: f7116846126a4cb17a0cddd6b3b429ad1592f260
+  subpackages:
+  - dsl
+- name: github.com/golang/protobuf
+  version: 3852dcfda249c2097355a6aabb199a28d97b30df
+  subpackages:
+  - proto
 - name: github.com/howeyc/fsnotify
   version: f0c08ee9c60704c1879025f2ae0ff3e000082c13
 - name: github.com/inconshreveable/mousetrap
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
+- name: github.com/jinzhu/gorm
+  version: 3324ab20633e8c7ec6d6b1f7a714a1a6e06fec08
+- name: github.com/jinzhu/inflection
+  version: 8f4d3a0d04ce0b7c0cf3126fb98524246d00d102
 - name: github.com/jteeuwen/go-bindata
   version: bbd0c6e271208dce66d8fda4bc536453cd27fc4a
   subpackages:
@@ -50,6 +58,10 @@ imports:
   version: add1dbc86daf0f983cd4a48ceb39deb95c729b67
 - name: github.com/kr/text
   version: 7cafcd837844e784b526369c9bce262804aebc60
+- name: github.com/lib/pq
+  version: 4dd446efc17690bc53e154025146f73203b18309
+  subpackages:
+  - oid
 - name: github.com/lsegal/gucumber
   version: 090009ec4b32fd019e2d5e1a6a92f66268441cee
 - name: github.com/manveru/faker
@@ -75,10 +87,25 @@ imports:
   subpackages:
   - context
   - websocket
+- name: golang.org/x/oauth2
+  version: 7357e96168422ba1e6e7f21075713b72d58764e7
+  subpackages:
+  - github
+  - internal
 - name: golang.org/x/tools
   version: 527b253f588776e5f72a0a0d1e93195cd3f82707
   subpackages:
   - go/ast/astutil
+- name: google.golang.org/appengine
+  version: 267c27e7492265b84fc6719503b14a1e17975d79
+  subpackages:
+  - urlfetch
+  - internal
+  - internal/urlfetch
+  - internal/base
+  - internal/datastore
+  - internal/log
+  - internal/remote_api
 - name: gopkg.in/yaml.v2
   version: a83829b6f1293c91addabc89d0571c246397bbf4
 testImports: []

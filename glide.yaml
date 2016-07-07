@@ -30,6 +30,7 @@ import:
 - package: github.com/elazarl/go-bindata-assetfs
   subpackages:
   - 'go-bindata-assetfs'
+- package: github.com/jinzhu/gorm
 - package: github.com/goadesign/gorma
 - package: golang.org/x/tools
   subpackages:
