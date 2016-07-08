@@ -81,3 +81,7 @@ generate: $(DESIGNS) $(GOAGEN_BIN) $(GO_BINDATA_ASSETFS_BIN) #$(GODEP_BIN)
 dev: $(FRESH_BIN)
 	docker-compose up
 	$(FRESH_BIN)
+
+.PHONY: dev
+fresh: $(FRESH_BIN)
+	$(FRESH_BIN)
