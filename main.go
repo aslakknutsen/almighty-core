@@ -7,9 +7,12 @@ import (
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/lib/pq"
+	"github.com/qor/admin"
+	"github.com/qor/qor"
 
 	"github.com/almighty/almighty-core/app"
 	"github.com/almighty/almighty-core/migration"
+	"github.com/almighty/almighty-core/models"
 	token "github.com/dgrijalva/jwt-go"
 	"github.com/goadesign/goa"
 	"github.com/goadesign/goa/middleware"
@@ -30,7 +33,7 @@ func main() {
 	flag.BoolVar(&Development, "dev", false, "Enable development related features, e.g. token generation endpoint")
 	flag.Parse()
 
-	db, err := gorm.Open("postgres", "user=postgres password=mysecretpassword sslmode=disable")
+	db, err := gorm.Open("postgres", "host=localhost port=5432 user=postgres password=mysecretpassword sslmode=disable")
 	if err != nil {
 		panic("failed to connect database")
 	}
@@ -65,12 +68,23 @@ func main() {
 	fmt.Println("UTC Build Time: ", BuildTime)
 	fmt.Println("Dev mode:       ", Development)
 
-	http.Handle("/api/", service.Mux)
-	http.Handle("/", http.FileServer(assetFS()))
-	http.Handle("/favicon.ico", http.NotFoundHandler())
+	Admin := admin.New(&qor.Config{DB: db})
+
+	Admin.AddResource(&models.Project{})
+	Admin.AddResource(&models.Identity{})
+	Admin.AddResource(&models.User{})
+	Admin.AddResource(&models.Team{})
+	Admin.AddResource(&models.Permission{})
+
+	mux := http.NewServeMux()
+	Admin.MountTo("/admin", mux)
+
+	mux.Handle("/api/", service.Mux)
+	mux.Handle("/", http.FileServer(assetFS()))
+	mux.Handle("/favicon.ico", http.NotFoundHandler())
 
 	// Start http
-	if err := http.ListenAndServe(":8080", nil); err != nil {
+	if err := http.ListenAndServe(":8080", mux); err != nil {
 		service.LogError("startup", "err", err)
 	}
 

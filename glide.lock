@@ -1,5 +1,5 @@
-hash: a8b689b5d897c16b907cba204761d72bd4f655058d906fc3be791f8df51a91dd
-updated: 2016-07-08T01:34:05.575456379+02:00
+hash: 40b4123ca1f569d8718bdff5ee3fae497809caa3e77b2f62afad1378eac4193d
+updated: 2016-07-08T01:47:21.682080462+02:00
 imports:
 - name: bitbucket.org/pkg/inflect
   version: 8961c3750a47b8c0b3e118d52513b97adf85a7e8
@@ -50,6 +50,8 @@ imports:
   version: 3324ab20633e8c7ec6d6b1f7a714a1a6e06fec08
 - name: github.com/jinzhu/inflection
   version: 8f4d3a0d04ce0b7c0cf3126fb98524246d00d102
+- name: github.com/jinzhu/now
+  version: d9861969c7a7e84746d341c09020c2ef8a617f8f
 - name: github.com/jteeuwen/go-bindata
   version: bbd0c6e271208dce66d8fda4bc536453cd27fc4a
   subpackages:
@@ -68,16 +70,31 @@ imports:
   version: 717f7cf83fb78669bfab612749c2e8ff63d5be11
 - name: github.com/mattn/go-colorable
   version: 9056b7a9f2d1f2d96498d6d146acd1f9d5ed3d59
+- name: github.com/microcosm-cc/bluemonday
+  version: 9dc199233bf72cc1aad9b61f73daf2f0075b9ee4
 - name: github.com/pilu/config
   version: 3eb99e6c0b9a2dae0f56f05552c06ca5a643919b
 - name: github.com/pilu/fresh
   version: 7261a962d4340e348cda4f98bd43a327be23c93e
+- name: github.com/qor/admin
+  version: a65a17b8fc0770fccfbab249ae8d053b44908a91
+- name: github.com/qor/qor
+  version: b41ff564370175cbcb7fbfbcc18b64b70d3250e2
+  subpackages:
+  - resource
+  - utils
+- name: github.com/qor/responder
+  version: 5418a89673865c8839eed3cbbb25d30e9c8b2529
+- name: github.com/qor/roles
+  version: 2c44eeffba3e666915376605327218afa30bc6ab
 - name: github.com/satori/go.uuid
   version: 879c5887cd475cd7864858769793b2ceb0d44feb
 - name: github.com/spf13/cobra
   version: 6a8bd97bdb1fc0d08a83459940498ea49d3e8c93
 - name: github.com/spf13/pflag
   version: 367864438f1b1a3c7db4da06a2f55b144e6784e0
+- name: github.com/theplant/cldr
+  version: 57654ebe9bbf01b5cc171bfe82a973e069b7efa4
 - name: github.com/tools/godep
   version: f5755188800cca4cffecf6068353a75a31c0bc56
 - name: github.com/zach-klippenstein/goregen
@@ -87,6 +104,8 @@ imports:
   subpackages:
   - context
   - websocket
+  - html
+  - html/atom
 - name: golang.org/x/oauth2
   version: 7357e96168422ba1e6e7f21075713b72d58764e7
   subpackages:
