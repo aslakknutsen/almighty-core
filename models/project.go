@@ -14,18 +14,18 @@ package models
 
 import (
 	"github.com/goadesign/goa"
-	"github.com/goadesign/goa/uuid"
 	"github.com/jinzhu/gorm"
+	uuid "github.com/satori/go.uuid"
 	"golang.org/x/net/context"
 	"time"
 )
 
 // This is the Project model
 type Project struct {
-	ID        uuid.UUID `sql:"type:uuid" gorm:"primary_key"` // This is the ID PK field
+	ID        uuid.UUID `sql:"type:uuid default uuid_generate_v4()" gorm:"primary_key"` // This is the ID PK field
 	CreatedAt time.Time
 	DeletedAt *time.Time
-	Name      string
+	Name      string `sql:"index:idx_project_name"`
 	UpdatedAt time.Time
 }
 

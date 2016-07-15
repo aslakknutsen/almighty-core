@@ -14,19 +14,19 @@ package models
 
 import (
 	"github.com/goadesign/goa"
-	"github.com/goadesign/goa/uuid"
 	"github.com/jinzhu/gorm"
+	uuid "github.com/satori/go.uuid"
 	"golang.org/x/net/context"
 	"time"
 )
 
 // Describes a User(single email) in any system
 type User struct {
-	ID         uuid.UUID `sql:"type:uuid" gorm:"primary_key"` // This is the ID PK field
+	ID         uuid.UUID `sql:"type:uuid default uuid_generate_v4()" gorm:"primary_key"` // This is the ID PK field
 	CreatedAt  time.Time
 	DeletedAt  *time.Time
-	Email      string // This is the unique email field
-	IdentityID int    // Belongs To Identity
+	Email      string    `sql:"unique_index"` // This is the unique email field
+	IdentityID uuid.UUID `sql:"type:uuid"`    // Belongs To Identity
 	UpdatedAt  time.Time
 	Identity   Identity
 }
@@ -74,7 +74,7 @@ func (m *UserDB) TableName() string {
 // Belongs To Relationships
 
 // UserFilterByIdentity is a gorm filter for a Belongs To relationship.
-func UserFilterByIdentity(identityID int, originaldb *gorm.DB) func(db *gorm.DB) *gorm.DB {
+func UserFilterByIdentity(identityID uuid.UUID, originaldb *gorm.DB) func(db *gorm.DB) *gorm.DB {
 	if identityID > 0 {
 		return func(db *gorm.DB) *gorm.DB {
 			return db.Where("identity_id = ?", identityID)
