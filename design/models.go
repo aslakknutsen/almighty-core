@@ -13,16 +13,19 @@ var sg = StorageGroup("ALMigthy Core Storage", func() {
 			Description("This is the Project model")
 			Field("id", gorma.UUID, func() {
 				PrimaryKey()
-				SQLTag("type:uuid")
+				SQLTag("type:uuid default uuid_generate_v4()")
 				Description("This is the ID PK field")
 			})
-			Field("name", gorma.String)
+			Field("name", gorma.String, func() {
+				SQLTag("index:idx_project_name")
+
+			})
 		})
 		Model("Identity", func() {
 			Description("Describes a unique Person with the ALM")
 			Field("id", gorma.UUID, func() {
 				PrimaryKey()
-				SQLTag("type:uuid")
+				SQLTag("type:uuid default uuid_generate_v4()")
 				Description("This is the ID PK field")
 			})
 			Field("full_name", gorma.String, func() {
@@ -30,6 +33,7 @@ var sg = StorageGroup("ALMigthy Core Storage", func() {
 			})
 			Field("image_url", gorma.String, func() {
 				Description("The image URL for this Identity")
+				DatabaseFieldName("image_url")
 			})
 			HasMany("emails", "User")
 		})
@@ -37,19 +41,20 @@ var sg = StorageGroup("ALMigthy Core Storage", func() {
 			Description("Describes a User(single email) in any system")
 			Field("id", gorma.UUID, func() {
 				PrimaryKey()
-				SQLTag("type:uuid")
+				SQLTag("type:uuid default uuid_generate_v4()")
 				Description("This is the ID PK field")
 			})
 			Field("email", gorma.String, func() {
+				SQLTag("unique_index")
 				Description("This is the unique email field")
 			})
-			BelongsTo("Identity")
+			BelongsTo("Identity", "type:uuid")
 		})
 		Model("Team", func() {
 			Description("Describes a Team and how users share e.g. Permissions")
 			Field("id", gorma.UUID, func() {
 				PrimaryKey()
-				SQLTag("type:uuid")
+				SQLTag("type:uuid default uuid_generate_v4()")
 				Description("This is the ID PK field")
 			})
 			Field("name", gorma.String, func() {
@@ -63,7 +68,7 @@ var sg = StorageGroup("ALMigthy Core Storage", func() {
 			Description("Describes a single permissions and it's relation to a team")
 			Field("id", gorma.UUID, func() {
 				PrimaryKey()
-				SQLTag("type:uuid")
+				SQLTag("type:uuid default uuid_generate_v4()")
 				Description("This is the ID PK field")
 			})
 			Field("name", gorma.String, func() {
