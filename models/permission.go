@@ -14,15 +14,15 @@ package models
 
 import (
 	"github.com/goadesign/goa"
-	"github.com/goadesign/goa/uuid"
 	"github.com/jinzhu/gorm"
+	uuid "github.com/satori/go.uuid"
 	"golang.org/x/net/context"
 	"time"
 )
 
 // Describes a single permissions and it's relation to a team
 type Permission struct {
-	ID        uuid.UUID `sql:"type:uuid" gorm:"primary_key"` // This is the ID PK field
+	ID        uuid.UUID `sql:"type:uuid default uuid_generate_v4()" gorm:"primary_key"` // This is the ID PK field
 	CreatedAt time.Time
 	DeletedAt *time.Time
 	Name      string // The string value/name of the permission used in auth token

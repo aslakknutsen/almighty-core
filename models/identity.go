@@ -14,20 +14,20 @@ package models
 
 import (
 	"github.com/goadesign/goa"
-	"github.com/goadesign/goa/uuid"
 	"github.com/jinzhu/gorm"
+	uuid "github.com/satori/go.uuid"
 	"golang.org/x/net/context"
 	"time"
 )
 
 // Describes a unique Person with the ALM
 type Identity struct {
-	ID        uuid.UUID `sql:"type:uuid" gorm:"primary_key"` // This is the ID PK field
+	ID        uuid.UUID `sql:"type:uuid default uuid_generate_v4()" gorm:"primary_key"` // This is the ID PK field
 	CreatedAt time.Time
 	DeletedAt *time.Time
 	Emails    []User // has many Users
 	FullName  string // The fullname of the Identity
-	ImageURL  string `gorm:"column:image_u_r_l"` // The image URL for this Identity
+	ImageURL  string // The image URL for this Identity
 	UpdatedAt time.Time
 }
 

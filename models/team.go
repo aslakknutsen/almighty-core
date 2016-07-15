@@ -14,15 +14,15 @@ package models
 
 import (
 	"github.com/goadesign/goa"
-	"github.com/goadesign/goa/uuid"
 	"github.com/jinzhu/gorm"
+	uuid "github.com/satori/go.uuid"
 	"golang.org/x/net/context"
 	"time"
 )
 
 // Describes a Team and how users share e.g. Permissions
 type Team struct {
-	ID          uuid.UUID `sql:"type:uuid" gorm:"primary_key"` // This is the ID PK field
+	ID          uuid.UUID `sql:"type:uuid default uuid_generate_v4()" gorm:"primary_key"` // This is the ID PK field
 	CreatedAt   time.Time
 	DeletedAt   *time.Time
 	Identities  []Identity   `gorm:"many2many:team_identity"` // many to many Team/Identity
