@@ -49,6 +49,7 @@ func (c *LoginController) Authorize(ctx *app.AuthorizeLoginContext) error {
 		authToken := app.AuthToken{Token: tokenStr}
 		return ctx.OK(&authToken)
 	*/
+
 	conf := &oauth2.Config{
 		ClientID:     "875da0d2113ba0a6951d",
 		ClientSecret: "2fe6736e90a9283036a37059d75ac0c82f4f5288",
@@ -75,6 +76,7 @@ func (c *LoginController) Authorize(ctx *app.AuthorizeLoginContext) error {
 		json.NewDecoder(resp.Body).Decode(&emails)
 		fmt.Println(emails)
 
+		// store 
 		// locate identity
 		// register emails in User table
 		// fetch permissions
