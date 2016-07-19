@@ -36,5 +36,4 @@ func (u *UserDB) Query(funcs ...func(*gorm.DB) *gorm.DB) ([]*User, error) {
 		return nil, err
 	}
 	return objs, nil
-
 }
