@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"log"
+	"net/http"
+	"reflect"
 	"strconv"
 
 	"golang.org/x/net/context"
@@ -218,6 +220,20 @@ func (c *WorkitemController) Show(ctx *app.ShowWorkitemContext) error {
 		wi2 := ConvertWorkItem(ctx.RequestData, wi, comments)
 		resp := &app.WorkItem2Single{
 			Data: wi2,
+		}
+
+		fmt.Println(reflect.TypeOf(ctx.ResponseData.ResponseWriter))
+
+		pusher, ok := ctx.ResponseData.ResponseWriter.(http.Pusher)
+		if ok {
+			if err := pusher.Push(*resp.Data.Relationships.Comments.Links.Related, nil); err != nil {
+				fmt.Println("Failed to push comments:", err)
+			}
+			if err := pusher.Push(fmt.Sprintf("https://localhost:8080/api/workitems/%v/relationships/links", *wi2.ID), nil); err != nil {
+				fmt.Println("Failed to push links", err)
+			}
+		} else {
+			fmt.Println("Push not supported")
 		}
 		return ctx.OK(resp)
 	})

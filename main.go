@@ -31,7 +31,6 @@ import (
 	"github.com/almighty/almighty-core/workitem/link"
 	"github.com/goadesign/goa"
 	"github.com/goadesign/goa/middleware"
-	"github.com/goadesign/goa/middleware/gzip"
 	"github.com/goadesign/goa/middleware/security/jwt"
 )
 
@@ -139,7 +138,7 @@ func main() {
 	// Mount middleware
 	service.Use(middleware.RequestID())
 	service.Use(middleware.LogRequest(true))
-	service.Use(gzip.Middleware(9))
+	//service.Use(gzip.Middleware(9))
 	service.Use(jsonapi.ErrorHandler(service, true))
 	service.Use(middleware.Recover())
 
@@ -255,7 +254,7 @@ func main() {
 	http.Handle("/favicon.ico", http.NotFoundHandler())
 
 	// Start http
-	if err := http.ListenAndServe(configuration.GetHTTPAddress(), nil); err != nil {
+	if err := http.ListenAndServeTLS(configuration.GetHTTPAddress(), "cert.pem", "key.pem", nil); err != nil {
 		service.LogError("startup", "err", err)
 	}
 
